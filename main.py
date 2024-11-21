@@ -1,5 +1,6 @@
 import os
 from fastapi import FastAPI
+from pydantic import BaseModel, EmailStr
 
 from dotenv import load_dotenv
 
@@ -13,6 +14,7 @@ from handlers.google_auth import get_credentials
 from handlers.google_drive import (
     copy_file,
     share_file,
+    list_spreadsheets,
 )
 
 app = FastAPI()
@@ -25,8 +27,9 @@ class Metadata(BaseModel):
 
 
 @app.get("/itineraries")
-def get_itineraries():
-    return {"message": "List of itineraries"}
+async def get_itineraries():
+    response = list_spreadsheets(credentials, parent=itineraries_folder_id)
+    return response
 
 
 @app.post("/itineraries")
