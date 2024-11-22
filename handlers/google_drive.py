@@ -15,7 +15,7 @@ def create_file(credentials, name, mime_type, parent=None):
         # pylint: disable=maybe-no-member
         file = service.files().create(body=file_metadata, fields="id").execute()
         print(f'File ID: "{file.get("id")}".')
-        return file.get("id")
+        return file
 
     except HttpError as error:
         print(f"An error occurred: {error}")
@@ -44,7 +44,7 @@ def copy_file(credentials, file_id, name, parent_id=None):
         # pylint: disable=maybe-no-member
         file = service.files().copy(body=file_metadata, fileId=file_id).execute()
         print(f'File ID: "{file.get("id")}".')
-        return file.get("id")
+        return file
 
     except HttpError as error:
         print(f"An error occurred: {error}")

@@ -20,25 +20,25 @@ credentials = get_credentials(os.getenv("SERVICE_ACCOUNT_FILE"))
 
 if __name__ == "__main__":
     # create google drive folders
-    itineraries_folder_id = create_folder(credentials=credentials, name="Itineraries")
+    itineraries_folder_id = create_folder(credentials, name="Itineraries")["id"]
+    archives_folder_id = create_folder(
+        credentials, name="Archives", parent=itineraries_folder_id
+    )["id"]
+    templates_folder_id = create_folder(
+        credentials, name="Templates", parent=itineraries_folder_id
+    )["id"]
+
     share_file(
-        credentials=credentials,
+        credentials,
         file_id=itineraries_folder_id,
         email_address=os.getenv("PROJECT_OWNER"),
         role="writer",
     )
 
-    archives_folder_id = create_folder(
-        credentials=credentials, name="Archives", parent=itineraries_folder_id
-    )
-    templates_folder_id = create_folder(
-        credentials=credentials, name="Templates", parent=itineraries_folder_id
-    )
-
     # create template itinerary
     template_spreadsheet_id = create_spreadsheet(
-        credentials, name="Template Itinerary", parent=templates_folder_id
-    )
+        credentials, name="Itinerary", parent=templates_folder_id
+    )["id"]
     bootstrap_spreadsheet(credentials, template_spreadsheet_id)
 
     response = list_files(credentials=credentials)

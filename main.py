@@ -34,16 +34,16 @@ async def get_itineraries():
 
 @app.post("/itineraries")
 async def create_itinerary(body: Metadata):
-    spreadsheet_id = copy_file(
+    response = copy_file(
         credentials,
         file_id=template_spreadsheet_id,
         name=body.name,
         parent_id=itineraries_folder_id,
     )
 
-    share_file(credentials, file_id=spreadsheet_id, email_address=body.email)
+    share_file(credentials, file_id=response["id"], email_address=body.email)
 
-    return {"spreadsheetId": spreadsheet_id}
+    return response
 
 
 @app.delete("/itineraries/{itinerary_id}")
