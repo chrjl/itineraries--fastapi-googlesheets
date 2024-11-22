@@ -73,3 +73,26 @@ def bootstrap_spreadsheet(credentials, spreadsheet_id):
     except HttpError as error:
         print(f"An error occurred: {error}")
         return error
+
+
+def get_spreadsheet_data(credentials, spreadsheet_id, range_name):
+    try:
+        service = build("sheets", "v4", credentials=credentials)
+
+        result = (
+            service.spreadsheets()
+            .values()
+            .get(spreadsheetId=spreadsheet_id, range=range_name)
+            .execute()
+        )
+        rows = result.get("values", [])
+        print(f"{len(rows)} rows retrieved")
+
+        header = rows[0]
+        data = rows[1:]
+
+        return [dict(zip(header, row)) for row in data]
+
+    except HttpError as error:
+        print(f"An error occurred: {error}")
+        return error
