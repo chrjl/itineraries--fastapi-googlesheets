@@ -5,9 +5,7 @@ from pydantic import BaseModel, EmailStr
 from dotenv import load_dotenv
 
 load_dotenv()
-itineraries_folder_id = os.getenv("ITINERARIES_FOLDER_ID")
 service_account_file = os.getenv("SERVICE_ACCOUNT_FILE")
-template_spreadsheet_id = os.getenv("TEMPLATE_SPREADSHEET_ID")
 
 
 from handlers.google_auth import get_credentials
@@ -21,6 +19,20 @@ from handlers.google_drive import (
 
 app = FastAPI()
 credentials = get_credentials(service_account_file)
+
+
+# find file ids
+folders = dict([[folder["name"], folder["id"]] for folder in list_folders(credentials)])
+
+print(f"Found folders: {','.join(folders.keys())}")
+
+template_id = [
+    file
+    for file in list_spreadsheets(credentials, folders["Templates"])
+    if file["name"] == "Itinerary"
+][0]["id"]
+
+print(f"Found spreadsheet: template itinerary")
 
 
 class Metadata(BaseModel):
@@ -38,9 +50,9 @@ async def get_itineraries():
 async def create_itinerary(body: Metadata):
     response = copy_file(
         credentials,
-        file_id=template_spreadsheet_id,
+        file_id=template_id,
         name=body.name,
-        parent_id=itineraries_folder_id,
+        parent_id=folders["Itineraries"],
     )
 
     share_file(credentials, file_id=response["id"], email_address=body.email)
