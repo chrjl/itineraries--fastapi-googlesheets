@@ -96,6 +96,14 @@ def list_spreadsheets(credentials, parent=None):
     )
 
 
+def get_parent_ids(credentials, file_id):
+    service = build("drive", "v3", credentials=credentials)
+    response = service.files().get(fileId=file_id, fields='parents').execute()
+
+    return response
+
+
+
 def delete_file(credentials, file_id):
     service = build("drive", "v3", credentials=credentials)
     response = service.files().delete(fileId=file_id).execute()
