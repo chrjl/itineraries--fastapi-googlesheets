@@ -40,13 +40,13 @@ class Metadata(BaseModel):
     email: EmailStr
 
 
-@app.get("/itineraries")
+@app.get("/itineraries", tags=["manage"])
 async def get_itineraries():
     response = list_spreadsheets(credentials, parent=folders["Itineraries"])
     return response
 
 
-@app.post("/itineraries")
+@app.post("/itineraries", tags=["manage"])
 async def create_itinerary(body: Metadata):
     response = copy_file(
         credentials,
@@ -68,21 +68,26 @@ async def archive_itinerary(itinerary_id: str):
     return response
 
 
-@app.get("/itineraries/{itinerary_id}")
+@app.get("/itineraries/{itinerary_id}", tags=["update"])
 def get_itinerary():
     return {"message": "Get an itinerary"}
 
 
-@app.patch("/itineraries/{itinerary_id}")
-def update_itinerary():
+@app.post("/itineraries/{itinerary_id}", tags=["update"])
+def add_to_itinerary():
     return {"message": "Update an itinerary"}
 
 
 @app.get("/archives", tags=["archives"])
 def get_archived_itineraries():
-    return {"message": "Get an itinerary"}
+    return {"message": "List archived itineraries"}
 
 
 @app.get("/archives/{itinerary_id}", tags=["archives"])
 def get_archived_itinerary():
-    return {"message": "Get an itinerary"}
+    return {"message": "Get an archived itinerary"}
+
+
+@app.delete("/archives/{itinerary_id}", tags=["archives"])
+def delete_archived_itinerary():
+    return {"message": "Permanently delete an archived itinerary"}
