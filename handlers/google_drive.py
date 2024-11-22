@@ -51,6 +51,21 @@ def copy_file(credentials, file_id, name, parent_id=None):
         return None
 
 
+def move_file(credentials, file_id, parent_id):
+    try:
+        # create drive api client
+        service = build("drive", "v3", credentials=credentials)
+
+        # pylint: disable=maybe-no-member
+        file = service.files().update(addParents=parent_id, fileId=file_id).execute()
+        print(f'File ID: "{file.get("id")}".')
+        return file
+
+    except HttpError as error:
+        print(f"An error occurred: {error}")
+        return None
+
+
 def list_files(credentials, mime_type=None, parent=None):
     try:
         # create drive api client
