@@ -13,8 +13,8 @@ from handlers.google_drive import (
     list_folders,
     list_spreadsheets,
     copy_file,
+    move_file,
     share_file,
-    list_spreadsheets,
 )
 
 app = FastAPI()
@@ -60,9 +60,12 @@ async def create_itinerary(body: Metadata):
     return response
 
 
-@app.delete("/itineraries/{itinerary_id}")
-def archive_itinerary():
-    return {"message": "Archive an itinerary"}
+@app.delete("/itineraries/{itinerary_id}", tags=["manage"])
+async def archive_itinerary(itinerary_id: str):
+    response = move_file(
+        credentials, file_id=itinerary_id, parent_id=folders["Archives"]
+    )
+    return response
 
 
 @app.get("/itineraries/{itinerary_id}")
