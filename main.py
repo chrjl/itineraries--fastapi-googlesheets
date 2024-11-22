@@ -12,6 +12,8 @@ template_spreadsheet_id = os.getenv("TEMPLATE_SPREADSHEET_ID")
 
 from handlers.google_auth import get_credentials
 from handlers.google_drive import (
+    list_folders,
+    list_spreadsheets,
     copy_file,
     share_file,
     list_spreadsheets,
@@ -28,7 +30,7 @@ class Metadata(BaseModel):
 
 @app.get("/itineraries")
 async def get_itineraries():
-    response = list_spreadsheets(credentials, parent=itineraries_folder_id)
+    response = list_spreadsheets(credentials, parent=folders["Itineraries"])
     return response
 
 

@@ -51,39 +51,34 @@ def copy_file(credentials, file_id, name, parent_id=None):
         return None
 
 
-def list_files(credentials):
+def list_files(credentials, mime_type=None, parent=None):
     try:
         # create drive api client
         service = build("drive", "v3", credentials=credentials)
-        response = service.files().list().execute()
+
+        q = ""
+        q += f"mimeType='{mime_type}'" if mime_type else ""
+        q += f" and '{parent}' in parents" if parent else ""
+
+        response = service.files().list(q=q).execute()
 
     except HttpError as error:
         print(f"An error occurred: {error}")
         response = None
 
-    return response["files"]
+    return response["files"] if response else []
+
+
+def list_folders(credentials, parent=None):
+    return list_files(
+        credentials, mime_type="application/vnd.google-apps.folder", parent=parent
+    )
 
 
 def list_spreadsheets(credentials, parent=None):
-    try:
-        # create drive api client
-        service = build("drive", "v3", credentials=credentials)
-        response = (
-            service.files()
-            .list(
-                q=(
-                    "mimeType='application/vnd.google-apps.spreadsheet'"
-                    + (f" and '{parent}' in parents" if parent else "")
-                )
-            )
-            .execute()
-        )
-
-    except HttpError as error:
-        print(f"An error occurred: {error}")
-        response = None
-
-    return response["files"]
+    return list_files(
+        credentials, mime_type="application/vnd.google-apps.spreadsheet", parent=parent
+    )
 
 
 def delete_file(credentials, file_id):
