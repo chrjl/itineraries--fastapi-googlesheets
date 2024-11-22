@@ -1,5 +1,6 @@
 import os
 from fastapi import FastAPI
+from fastapi.encoders import jsonable_encoder
 from pydantic import BaseModel, EmailStr
 from typing import Literal
 from datetime import date, datetime
@@ -18,7 +19,7 @@ from handlers.google_drive import (
     move_file,
     share_file,
 )
-from handlers.google_sheets import get_spreadsheet_data
+from handlers.google_sheets import get_spreadsheet_data, append_sheet
 
 app = FastAPI()
 credentials = get_credentials(service_account_file)
@@ -127,8 +128,20 @@ async def get_itinerary(itinerary_id: str) -> list[Resource]:
 
 
 @app.post("/itineraries/{itinerary_id}", tags=["update"])
-def add_to_itinerary():
-    return {"message": "Update an itinerary"}
+async def add_to_itinerary(itinerary_id: str, body: Resource):
+    sheet_name = (
+        "housing"
+        if body.category == "housing"
+        else "transportation" if body.category == "transportation" else "activities"
+    )
+    response = append_sheet(
+        credentials,
+        spreadsheet_id=itinerary_id,
+        sheet_name=sheet_name,
+        data=jsonable_encoder(body),
+    )
+
+    return response
 
 
 @app.get("/archives", tags=["archives"])
