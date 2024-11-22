@@ -18,6 +18,7 @@ from handlers.google_drive import (
     move_file,
     share_file,
 )
+from handlers.google_sheets import get_spreadsheet_data
 
 app = FastAPI()
 credentials = get_credentials(service_account_file)
@@ -99,9 +100,30 @@ async def archive_itinerary(itinerary_id: str):
     return response
 
 
-@app.get("/itineraries/{itinerary_id}", tags=["update"])
-def get_itinerary():
-    return {"message": "Get an itinerary"}
+@app.get(
+    "/itineraries/{itinerary_id}", tags=["update"], response_model_exclude_none=True
+)
+async def get_itinerary(itinerary_id: str) -> list[Resource]:
+    activities = [
+        {"category": "activity", **activity}
+        for activity in get_spreadsheet_data(
+            credentials, spreadsheet_id=itinerary_id, range_name="activities"
+        )
+    ]
+    housing = [
+        {"category": "housing", **housing}
+        for housing in get_spreadsheet_data(
+            credentials, spreadsheet_id=itinerary_id, range_name="housing"
+        )
+    ]
+    transportation = [
+        {"category": "transportation", **transportation}
+        for transportation in get_spreadsheet_data(
+            credentials, spreadsheet_id=itinerary_id, range_name="transportation"
+        )
+    ]
+
+    return [*activities, *housing, *transportation]
 
 
 @app.post("/itineraries/{itinerary_id}", tags=["update"])
