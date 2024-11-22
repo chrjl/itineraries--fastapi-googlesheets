@@ -1,6 +1,8 @@
 import os
 from fastapi import FastAPI
 from pydantic import BaseModel, EmailStr
+from typing import Literal
+from datetime import date, datetime
 
 from dotenv import load_dotenv
 
@@ -38,6 +40,35 @@ print(f"Found spreadsheet: template itinerary")
 class Metadata(BaseModel):
     name: str
     email: EmailStr
+
+
+class Resource(BaseModel):
+    category: Literal["activity", "transportation", "housing"] = "activity"
+    name: str
+    itinerary: str | None = None
+    location: str | None = None
+    location_detail: str | None = None
+    location_from: str | None = None
+    location_to: str | None = None
+    date_start: date | datetime | None = None
+    date_end: date | datetime | None = None
+    cost: float | None = None
+    notes: str | None = None
+
+    model_config = {
+        "json_schema_extra": {
+            "examples": [
+                {
+                    "name": "Hiking",
+                    "location": "Red Rock Canyon State Park",
+                    "location_detail": "Nightmare Gulch",
+                    "cost": "6",
+                    "date_start": "2024-11-30",
+                    "date_end": "2024-11-30",
+                }
+            ]
+        }
+    }
 
 
 @app.get("/itineraries", tags=["manage"])
