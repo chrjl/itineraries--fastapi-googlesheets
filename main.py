@@ -1,5 +1,5 @@
 import os
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from fastapi.encoders import jsonable_encoder
 from pydantic import BaseModel, EmailStr
 from typing import Literal
@@ -15,9 +15,11 @@ from handlers.google_auth import get_credentials
 from handlers.google_drive import (
     list_folders,
     list_spreadsheets,
+    get_parent_ids,
     copy_file,
     move_file,
     share_file,
+    delete_file,
 )
 from handlers.google_sheets import get_spreadsheet_data, append_sheet
 
@@ -146,14 +148,20 @@ async def add_to_itinerary(itinerary_id: str, body: Resource):
 
 @app.get("/archives", tags=["archives"])
 def get_archived_itineraries():
-    return {"message": "List archived itineraries"}
-
-
-@app.get("/archives/{itinerary_id}", tags=["archives"])
-def get_archived_itinerary():
-    return {"message": "Get an archived itinerary"}
+    response = list_spreadsheets(credentials, parent=folders["Archives"])
+    return response
 
 
 @app.delete("/archives/{itinerary_id}", tags=["archives"])
-def delete_archived_itinerary():
-    return {"message": "Permanently delete an archived itinerary"}
+def permanently_delete_archived_itinerary(itinerary_id: str):
+    response = get_parent_ids(credentials, file_id=itinerary_id)
+    parent = response.get("parents", [])[0]
+
+    if parent != folders["Archives"]:
+        raise HTTPException(
+            status_code=403, detail="Attempting to delete an active itinerary"
+        )
+
+    response = delete_file(credentials, itinerary_id)
+
+    return response
