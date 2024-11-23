@@ -1,6 +1,6 @@
 # Trip Itinerary App
 
-A FastAPI front-facing REST API that uses Google Sheets as a backend by interfacing with Google Workspace APIs (Google Drive, Google Sheets). Requires authorized service account credentials for the Google Cloud Project to be stored at `credentials.json`.
+A trip itinerary planner using Google Sheets as a backend. FastAPI is used as a front-facing REST API to interface with Google Workspace APIs (Google Drive, Google Sheets). Requires authorized service account credentials for the Google Cloud Project to be stored at `credentials.json`.
 
 ## Run the dev server
 
@@ -64,4 +64,4 @@ And store the returned file IDs in their corresponding environment variables:
 
 ## How it works
 
-Creating a new itinerary copies the template itinerary spreadsheet into a new spreadsheet in the active itineraries folder and shares it with the requester. Archiving an itinerary moves the itinerary spreadsheet into the archives folder.
+Creating a new itinerary copies the template itinerary spreadsheet into a new spreadsheet in the active itineraries folder and shares it with the requester. Archiving an itinerary moves the itinerary spreadsheet into the archives folder. Archived spreadsheets can be permanently deleted, attempting to delete an active (non-archived) spreadsheet will fail.
