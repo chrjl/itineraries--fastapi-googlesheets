@@ -127,3 +127,20 @@ def append_sheet(credentials, spreadsheet_id, sheet_name, data):
         except HttpError as error:
             print(f"An error occurred: {error}")
             return error
+
+
+def clear_sheet(credentials, spreadsheet_id, sheet_name):
+    range_name = f"{sheet_name}!A2:Z"
+
+    with build("sheets", "v4", credentials=credentials) as service:
+        try:
+            response = (
+                service.spreadsheets()
+                .values()
+                .clear(spreadsheetId=spreadsheet_id, range=range_name)
+                .execute()
+            )
+            return response
+        except HttpError as error:
+            print(f"An error occurred: {error}")
+            return error
