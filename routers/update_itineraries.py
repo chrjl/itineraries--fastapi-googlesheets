@@ -5,7 +5,7 @@ from fastapi import APIRouter, Request
 from fastapi.encoders import jsonable_encoder
 from pydantic import BaseModel
 
-from ..handlers.google_sheets import get_spreadsheet_data, append_sheet
+from ..handlers.google_sheets import get_spreadsheet_data, append_sheet, clear_sheet
 
 
 class Category(str, Enum):
@@ -92,8 +92,23 @@ async def add_to_itinerary(request: Request, id: str, body: Resource):
     return response
 
 
-@router.put("/{itinerary_id}")
+@router.put("/{id}/{category}")
 async def update_an_itinerary(
-    request: Request, itinerary_id: str, body: list[Resource]
+    request: Request, id: str, category: Category, body: list[Resource]
 ):
-    pass
+    sheet_name = (
+        "housing"
+        if category == Category.housing
+        else "transportation" if category == Category.transportation else "activities"
+    )
+
+    clear_sheet(request.app.credentials, spreadsheet_id=id, sheet_name=sheet_name)
+
+    response = append_sheet(
+        request.app.credentials,
+        spreadsheet_id=id,
+        sheet_name=sheet_name,
+        data=jsonable_encoder(body),
+    )
+
+    return response
