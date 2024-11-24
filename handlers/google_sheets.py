@@ -19,49 +19,19 @@ def bootstrap_spreadsheet(credentials, spreadsheet_id):
             ).execute()
 
             # add headers to each sheet
-            header_rows = [
-                {
-                    "values": [
-                        "name",
-                        "itinerary",
-                        "location",
-                        "location_detail",
-                        "date_start",
-                        "date_end",
-                        "cost",
-                        "notes",
-                    ],
-                    "range_name": "activities",
-                },
-                {
-                    "values": [
-                        "name",
-                        "itinerary",
-                        "location",
-                        "location_detail",
-                        "date_start",
-                        "date_end",
-                        "cost",
-                        "notes",
-                    ],
-                    "range_name": "housing",
-                },
-                {
-                    "values": [
-                        "name",
-                        "itinerary",
-                        "location_from",
-                        "location_to",
-                        "date_start",
-                        "date_end",
-                        "cost",
-                        "notes",
-                    ],
-                    "range_name": "transportation",
-                },
+            columns = [
+                "name",
+                "itinerary",
+                "location_1",
+                "location_2",
+                "date_start",
+                "date_end",
+                "cost",
+                "notes",
             ]
+            sheet_names = ["activities", "transportation", "housing"]
 
-            for header in header_rows:
+            for sheet in sheet_names:
                 service.spreadsheets().values().append(
                     spreadsheetId=spreadsheet_id,
                     range=sheet,

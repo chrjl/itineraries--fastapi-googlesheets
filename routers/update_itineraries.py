@@ -20,10 +20,8 @@ class Resource(BaseModel):
     category: Category | str = Category.activity
     name: str
     itinerary: str | None = None
-    location: str | None = None
-    location_detail: str | None = None
-    location_from: str | None = None
-    location_to: str | None = None
+    location_1: str | None = None
+    location_2: str | None = None
     date_start: date | datetime | None = None
     date_end: date | datetime | None = None
     cost: float | None = None
@@ -35,8 +33,8 @@ class Resource(BaseModel):
                 {
                     "category": "activity",
                     "name": "Hiking",
-                    "location": "Red Rock Canyon State Park",
-                    "location_detail": "Nightmare Gulch",
+                    "location_1": "Red Rock Canyon State Park",
+                    "location_2": "Nightmare Gulch",
                     "cost": "6",
                     "date_start": "2024-11-30",
                     "date_end": "2024-11-30",
