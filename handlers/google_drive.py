@@ -98,6 +98,12 @@ def list_spreadsheets(credentials, parent=None):
         credentials, mime_type="application/vnd.google-apps.spreadsheet", parent=parent
     )
 
+def get_file(credentials, file_id):
+    with build("drive", "v3", credentials=credentials) as service:
+        response = service.files().get(fileId=file_id).execute()
+    
+    return response
+
 
 def get_parent_ids(credentials, file_id):
     with build("drive", "v3", credentials=credentials) as service:
