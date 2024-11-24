@@ -6,6 +6,7 @@ from fastapi.encoders import jsonable_encoder
 from pydantic import BaseModel
 
 from .manage_itineraries import File
+from ..handlers.google_drive import get_file
 from ..handlers.google_sheets import get_spreadsheet_data, append_sheet, clear_sheet
 
 
@@ -53,7 +54,9 @@ router = APIRouter()
 
 
 @router.get("/{id}", response_model_exclude_none=True)
-async def get_itinerary(request: Request, id: str) -> list[Resource]:
+async def get_itinerary(request: Request, id: str) -> Itinerary:
+    file = get_file(request.app.credentials, id)
+
     activities = [
         {"category": "activity", **activity}
         for activity in get_spreadsheet_data(
@@ -77,7 +80,7 @@ async def get_itinerary(request: Request, id: str) -> list[Resource]:
         )
     ]
 
-    return [*activities, *housing, *transportation]
+    return {**file, "data": [*activities, *housing, *transportation]}
 
 
 @router.post("/{id}")
