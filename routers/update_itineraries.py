@@ -5,6 +5,7 @@ from fastapi import APIRouter, Request
 from fastapi.encoders import jsonable_encoder
 from pydantic import BaseModel
 
+from .manage_itineraries import File
 from ..handlers.google_sheets import get_spreadsheet_data, append_sheet, clear_sheet
 
 
@@ -42,6 +43,10 @@ class Resource(BaseModel):
             ]
         }
     }
+
+
+class Itinerary(File):
+    data: list[Resource]
 
 
 router = APIRouter()
