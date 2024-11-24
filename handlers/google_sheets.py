@@ -64,9 +64,9 @@ def bootstrap_spreadsheet(credentials, spreadsheet_id):
             for header in header_rows:
                 service.spreadsheets().values().append(
                     spreadsheetId=spreadsheet_id,
-                    range=header["range_name"],
-                    valueInputOption="USER_ENTERED",
-                    body={"values": [header["values"]]},
+                    range=sheet,
+                    valueInputOption="RAW",
+                    body={"values": [columns]},
                 ).execute()
 
         except HttpError as error:
@@ -107,7 +107,9 @@ def append_sheet(credentials, spreadsheet_id, sheet_name, data):
             )
 
             header = result.get("values", [])[0]
-            body = {"values": [[data.get(field, None) for field in header]]}
+            body = {
+                "values": [[row.get(field, None) for field in header] for row in data]
+            }
 
             result = (
                 service.spreadsheets()
@@ -115,7 +117,7 @@ def append_sheet(credentials, spreadsheet_id, sheet_name, data):
                 .append(
                     spreadsheetId=spreadsheet_id,
                     range=sheet_name,
-                    valueInputOption="USER_ENTERED",
+                    valueInputOption="RAW",
                     body=body,
                 )
                 .execute()
