@@ -73,7 +73,14 @@ def list_files(credentials, mime_type=None, parent=None):
         q += f" and '{parent}' in parents" if parent else ""
 
         try:
-            response = service.files().list(q=q).execute()
+            response = (
+                service.files()
+                .list(
+                    q=q,
+                    fields="files(id, name, kind, mimeType, createdTime, modifiedTime)",
+                )
+                .execute()
+            )
             return response.get("files")
         except HttpError as error:
             print(f"An error occurred: {error}")
