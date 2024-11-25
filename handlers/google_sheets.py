@@ -1,5 +1,6 @@
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
+from fastapi import HTTPException
 
 
 def bootstrap_spreadsheet(credentials, spreadsheet_id):
@@ -66,7 +67,7 @@ def get_spreadsheet_data(credentials, spreadsheet_id, range_name):
 
         except HttpError as error:
             print(f"An error occurred: {error}")
-            return error
+            raise HTTPException(status_code=error.resp.status)
 
 
 def append_sheet(credentials, spreadsheet_id, sheet_name, data):
@@ -101,7 +102,7 @@ def append_sheet(credentials, spreadsheet_id, sheet_name, data):
 
         except HttpError as error:
             print(f"An error occurred: {error}")
-            return error
+            raise HTTPException(status_code=error.resp.status)
 
 
 def clear_sheet(credentials, spreadsheet_id, sheet_name):
