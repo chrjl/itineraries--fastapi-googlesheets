@@ -25,11 +25,15 @@ After [setting up the Google Cloud project](#setting-up-the-google-cloud-project
   - `ARCHIVES_FOLDER_ID`
   - `TEMPLATE_SPREADSHEET_ID`
 
-Run the FastAPI dev server:
+Run the FastAPI dev server (default port 8000):
 
 ```shell
-fastapi dev main.py
+fastapi dev main.py [--port PORT]
 ```
+
+The API server is mounted to `/api`. View the API docs: `localhost[:PORT]/api/docs`
+
+Static export of the reference [frontend app](https://github.com/chrjl/itineraries--frontend) is mounted to the server root. Run the app: `localhost[:PORT]`
 
 ## Setting up the Google Cloud Project
 
