@@ -59,7 +59,10 @@ def get_spreadsheet_data(credentials, spreadsheet_id, range_name):
             header = rows[0]
             data = rows[1:]
 
-            return [dict(zip(header, row)) for row in data]
+            return [
+                dict([key, value] for (key, value) in zip(header, row) if value)
+                for row in data
+            ]
 
         except HttpError as error:
             print(f"An error occurred: {error}")
