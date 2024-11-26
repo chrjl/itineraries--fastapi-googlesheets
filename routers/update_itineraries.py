@@ -100,7 +100,10 @@ async def add_to_itinerary(request: Request, id: str, body: Resource):
 
 @router.put("/{id}/{category}")
 async def update_an_itinerary(
-    request: Request, id: str, category: Category, body: list[Resource]
+    request: Request,
+    id: str,
+    category: Literal["activities", "housing", "transportation"],
+    body: list[Resource],
 ):
     sheet_name = (
         "housing"
