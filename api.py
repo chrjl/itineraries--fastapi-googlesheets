@@ -1,4 +1,5 @@
 import os
+import json
 import logging
 
 logger = logging.getLogger("uvicorn.error")
@@ -14,7 +15,11 @@ from .routers import archives, manage_itineraries, update_itineraries
 from .handlers.google_auth import get_credentials
 from .handlers.google_drive import list_folders, list_spreadsheets
 
-credentials = get_credentials(service_account_file)
+with open(service_account_file) as file:
+    service_account_info = json.load(file)
+
+credentials = get_credentials(service_account_file=service_account_file)
+# credentials = get_credentials(service_account_info=service_account_info)
 
 # find file ids
 folders = dict([[folder["name"], folder["id"]] for folder in list_folders(credentials)])
