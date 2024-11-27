@@ -1,9 +1,14 @@
 import os
+import logging
+
+logger = logging.getLogger("uvicorn.error")
+logger.setLevel(logging.DEBUG)
+
 from fastapi import FastAPI
 from dotenv import load_dotenv
 
 load_dotenv()
-service_account_file = os.getenv("SERVICE_ACCOUNT_FILE")
+service_account_file = os.getenv("SERVICE_ACCOUNT_FILE") or "credentials.json"
 
 from .routers import archives, manage_itineraries, update_itineraries
 from .handlers.google_auth import get_credentials
@@ -13,16 +18,33 @@ credentials = get_credentials(service_account_file)
 
 # find file ids
 folders = dict([[folder["name"], folder["id"]] for folder in list_folders(credentials)])
-
-print(f"Found folders: {','.join(folders.keys())}")
-
-template_id = [
+template = [
     file
     for file in list_spreadsheets(credentials, folders["Templates"])
     if file["name"] == "Itinerary"
-][0]["id"]
+]
 
-print(f"Found spreadsheet: template itinerary")
+if "Itineraries" in folders:
+    logger.debug(f"Found folder `Itineraries`: {folders["Itineraries"]}")
+else:
+    raise FileNotFoundError("Could not find `Itineraries` folder")
+
+if "Archives" in folders:
+    logger.debug(f"Found folder `Archives`   : {folders["Archives"]}")
+else:
+    raise FileNotFoundError("Could not find `Archives` folder")
+
+if "Templates" in folders:
+    logger.debug(f"Found folder `Templates`  : {folders["Templates"]}")
+else:
+    raise FileNotFoundError("Could not find `Templates` folder")
+
+if template:
+    template_id = template[0]["id"]
+    logger.debug(f"Found spreadsheet `Templates/Itinerary`: {template_id}")
+else:
+    raise FileNotFoundError("Could not find template itinerary")
+
 
 api = FastAPI()
 
