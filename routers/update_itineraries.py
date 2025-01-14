@@ -1,24 +1,29 @@
-from typing import Literal
+from typing import Annotated
 from datetime import date, datetime
 from enum import Enum
-from fastapi import APIRouter, Request
+from fastapi import APIRouter, Request, Path
 from fastapi.encoders import jsonable_encoder
 from pydantic import BaseModel
 
 from .manage_itineraries import File
 from ..handlers.google_drive import get_file
-from ..handlers.google_sheets import get_spreadsheet_data, append_sheet, clear_sheet
+from ..handlers.google_sheets import (
+    get_spreadsheet_data,
+    append_sheet,
+    update_row,
+    delete_row,
+)
 
 
 class Category(str, Enum):
-    activity = "activity"
+    activities = "activities"
     transportation = "transportation"
     housing = "housing"
 
 
 class Resource(BaseModel):
-    category: Category | str = Category.activity
     name: str
+    index: int | None = None
     itinerary: str | None = None
     location_1: str | None = None
     location_2: str | None = None
@@ -44,80 +49,90 @@ class Resource(BaseModel):
     }
 
 
+class Data(BaseModel):
+    activities: list[Resource] = []
+    housing: list[Resource] = []
+    transportation: list[Resource] = []
+
+
 class Itinerary(File):
-    data: list[Resource]
+    data: Data
 
 
 router = APIRouter()
 
 
 @router.get("/{id}", response_model_exclude_none=True)
-async def get_itinerary(request: Request, id: str) -> Itinerary:
+async def get_itinerary_activities(request: Request, id: str) -> Itinerary:
     file = get_file(request.app.credentials, id)
 
-    activities = [
-        {"category": "activity", **activity}
-        for activity in get_spreadsheet_data(
-            request.app.credentials,
-            spreadsheet_id=id,
-            range_name="activities",
-        )
-    ]
-    housing = [
-        {"category": "housing", **housing}
-        for housing in get_spreadsheet_data(
-            request.app.credentials, spreadsheet_id=id, range_name="housing"
-        )
-    ]
-    transportation = [
-        {"category": "transportation", **transportation}
-        for transportation in get_spreadsheet_data(
-            request.app.credentials,
-            spreadsheet_id=id,
-            range_name="transportation",
-        )
-    ]
-
-    return {**file, "data": [*activities, *housing, *transportation]}
-
-
-@router.post("/{id}")
-async def add_to_itinerary(request: Request, id: str, body: Resource):
-    sheet_name = (
-        "housing"
-        if body.category == "housing"
-        else "transportation" if body.category == "transportation" else "activities"
+    activities = get_spreadsheet_data(
+        request.app.credentials, spreadsheet_id=id, range_name="activities"
     )
+
+    housing = get_spreadsheet_data(
+        request.app.credentials, spreadsheet_id=id, range_name="housing"
+    )
+
+    transportation = get_spreadsheet_data(
+        request.app.credentials, spreadsheet_id=id, range_name="transportation"
+    )
+
+    return {
+        **file,
+        "data": {
+            "activities": activities,
+            "housing": housing,
+            "transportation": transportation,
+        },
+    }
+
+
+@router.post("/{id}/{category}")
+async def create_activity(
+    request: Request, id: str, category: Category, body: Resource
+):
     response = append_sheet(
         request.app.credentials,
         spreadsheet_id=id,
-        sheet_name=sheet_name,
+        sheet_name=category.value,
         data=jsonable_encoder([body]),
     )
 
     return response
 
 
-@router.put("/{id}/{category}")
-async def update_an_itinerary(
+@router.put("/{id}/{category}/{index}")
+async def overwrite_activity(
     request: Request,
     id: str,
-    category: Literal["activities", "housing", "transportation"],
-    body: list[Resource],
+    index: int,
+    category: Category,
+    body: Resource,
 ):
-    sheet_name = (
-        "housing"
-        if category == Category.housing
-        else "transportation" if category == Category.transportation else "activities"
-    )
-
-    clear_sheet(request.app.credentials, spreadsheet_id=id, sheet_name=sheet_name)
-
-    response = append_sheet(
+    response = update_row(
         request.app.credentials,
         spreadsheet_id=id,
-        sheet_name=sheet_name,
+        sheet_name=category.value,
+        index=index,
         data=jsonable_encoder(body),
+    )
+
+    return response
+
+
+@router.delete("/{id}/{category}/{index}")
+async def delete_activity(
+    request: Request,
+    id: str,
+    index: int,
+    category: Category,
+):
+    response = delete_row(
+        request.app.credentials,
+        spreadsheet_id=id,
+        sheet_name=category.value,
+        index=index,
     )
 
     return response
