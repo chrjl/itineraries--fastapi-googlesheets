@@ -18,8 +18,8 @@ from .handlers.google_drive import list_folders, list_spreadsheets
 with open(service_account_file) as file:
     service_account_info = json.load(file)
 
-credentials = get_credentials(service_account_file=service_account_file)
-# credentials = get_credentials(service_account_info=service_account_info)
+# credentials = get_credentials(service_account_file=service_account_file)
+credentials = get_credentials(service_account_info=service_account_info)
 
 # find file ids
 folders = dict([[folder["name"], folder["id"]] for folder in list_folders(credentials)])
@@ -57,6 +57,6 @@ api.credentials = credentials
 api.folders = folders
 api.template_id = template_id
 
-api.include_router(manage_itineraries.router, prefix="/itineraries", tags=["manage"])
-api.include_router(update_itineraries.router, prefix="/itineraries", tags=["update"])
+api.include_router(manage_itineraries.router, prefix="/itineraries", tags=["itineraries"])
+api.include_router(update_itineraries.router, prefix="/itineraries", tags=["activities"])
 api.include_router(archives.router, prefix="/archives", tags=["archives"])
